@@ -1,0 +1,44 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# Xcode
+DerivedData/
+*.xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Local app bundles and generated assets
+dist/
+output/
+tmp/
+*.app/
+*.dmg
+
+# Secrets and local environment
+.env
+.env.*
+*.local.json
+*_cpa_*.json
+*token*.json
+*secret*.json
+*credential*.json
+
+# Local agent/editor config
+.claude/
+.codex/
+.worktrees/
+
+# Logs
+*.log
