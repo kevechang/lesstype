@@ -72,7 +72,7 @@ It's built entirely with Swift, SwiftUI, AppKit, AVFoundation, and Apple's Speec
 
 ### Download the app
 
-Download the latest `lesstype-v*-macos.zip` from [GitHub Releases](https://github.com/kevechang/lesstype/releases/latest), unzip it, then move `lesstype.app` to `/Applications`.
+Download the latest `lesstype-v*-macos.dmg` from [GitHub Releases](https://github.com/kevechang/lesstype/releases/latest), open it, then drag `lesstype.app` to `Applications`. A `.zip` package is also attached as a fallback.
 
 The app is currently ad-hoc signed but not notarized. On first launch, macOS may ask you to confirm opening it from **System Settings → Privacy & Security**.
 
@@ -89,8 +89,11 @@ swift test
 # build and launch the .app bundle (output: dist/lesstype.app)
 ./script/build_and_run.sh
 
-# package a release zip (output: dist/lesstype-v0.1.0-macos.zip)
-./script/package_release.sh 0.1.0
+# package a release zip (output: dist/lesstype-v0.1.1-macos.zip)
+./script/package_release.sh 0.1.1
+
+# package a DMG installer (output: dist/lesstype-v0.1.1-macos.dmg)
+./script/package_dmg.sh 0.1.1
 ```
 
 On first launch, macOS may ask for Microphone, Speech Recognition, and Accessibility permissions. If hotkeys or text insertion don't work, grant access under:

@@ -72,7 +72,7 @@
 
 ### 下载 App
 
-从 [GitHub Releases](https://github.com/kevechang/lesstype/releases/latest) 下载最新的 `lesstype-v*-macos.zip`，解压后把 `lesstype.app` 移到 `/Applications`。
+从 [GitHub Releases](https://github.com/kevechang/lesstype/releases/latest) 下载最新的 `lesstype-v*-macos.dmg`，打开后把 `lesstype.app` 拖到 `Applications`。同时也会提供 `.zip` 作为备用下载。
 
 当前 App 使用 ad-hoc 签名，但还没有 notarize。首次启动时，macOS 可能需要你在 **系统设置 → 隐私与安全性** 中确认打开。
 
@@ -89,8 +89,11 @@ swift test
 # 构建并启动 .app（产物：dist/lesstype.app）
 ./script/build_and_run.sh
 
-# 打包 release zip（产物：dist/lesstype-v0.1.0-macos.zip）
-./script/package_release.sh 0.1.0
+# 打包 release zip（产物：dist/lesstype-v0.1.1-macos.zip）
+./script/package_release.sh 0.1.1
+
+# 打包 DMG 安装包（产物：dist/lesstype-v0.1.1-macos.dmg）
+./script/package_dmg.sh 0.1.1
 ```
 
 首次启动时，macOS 可能会请求麦克风、语音识别和辅助功能权限。如果快捷键或文本插入不可用，请在以下位置授权：
