@@ -70,7 +70,13 @@ It's built entirely with Swift, SwiftUI, AppKit, AVFoundation, and Apple's Speec
 
 ## Quick Start
 
-Prebuilt releases are not available yet — build from source for now.
+### Download the app
+
+Download the latest `lesstype-v*-macos.zip` from [GitHub Releases](https://github.com/kevechang/lesstype/releases/latest), unzip it, then move `lesstype.app` to `/Applications`.
+
+The app is currently ad-hoc signed but not notarized. On first launch, macOS may ask you to confirm opening it from **System Settings → Privacy & Security**.
+
+### Build from source
 
 ```bash
 git clone https://github.com/kevechang/lesstype.git
@@ -83,8 +89,8 @@ swift test
 # build and launch the .app bundle (output: dist/lesstype.app)
 ./script/build_and_run.sh
 
-# build and verify the app launches, then quit
-./script/build_and_run.sh --verify
+# package a release zip (output: dist/lesstype-v0.1.0-macos.zip)
+./script/package_release.sh 0.1.0
 ```
 
 On first launch, macOS may ask for Microphone, Speech Recognition, and Accessibility permissions. If hotkeys or text insertion don't work, grant access under:
