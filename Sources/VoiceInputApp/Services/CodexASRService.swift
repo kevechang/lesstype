@@ -61,7 +61,7 @@ public protocol CodexASRCredentialStoring: Sendable {
 }
 
 public struct KeychainCodexASRCredentialStore: CodexASRCredentialStoring {
-    private let service = "app.lesstype.voiceinput"
+    private let service = "app.typeart.voiceinput"
     private let account = "codex-asr-credentials"
 
     public init() {}
@@ -134,7 +134,7 @@ public struct CodexASRTranscriptionService: AudioTranscriptionServing {
 
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
-        request.timeoutInterval = 30
+        request.timeoutInterval = 60
         request.setValue("Bearer \(credentials.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue(credentials.accountID, forHTTPHeaderField: "Chatgpt-Account-Id")
         request.setValue("Codex Desktop", forHTTPHeaderField: "originator")
@@ -236,7 +236,7 @@ public struct CodexASRFinalTranscriptionService: Sendable {
     public init(
         transcription: AudioTranscriptionServing = CodexASRTranscriptionService(),
         postProcessor: TextPostProcessor = TextPostProcessor(),
-        timeout: Duration = .seconds(12),
+        timeout: Duration = .seconds(60),
         reportStatus: @escaping @MainActor @Sendable (String) -> Void = { _ in },
         recordUsage: @escaping @MainActor @Sendable (CodexASRUsageOutcome) -> Void = { _ in }
     ) {
@@ -257,7 +257,7 @@ public struct CodexASRFinalTranscriptionService: Sendable {
         }
 
         do {
-            await reportStatus("Codex ASR 转写中...")
+            await reportStatus(Self.transcribingStatus(audioURL: audioURL, timeout: timeout))
             let text = TextPostProcessor.simplifiedChinese(
                 try await transcribeWithTimeout(audioURL: audioURL, languageMode: preferences.languageMode)
             )
@@ -305,6 +305,24 @@ public struct CodexASRFinalTranscriptionService: Sendable {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss"
         return formatter.string(from: Date())
+    }
+
+    private static func transcribingStatus(audioURL: URL, timeout: Duration) -> String {
+        "Codex ASR 转写中... 最长等待 \(timeoutSeconds(timeout)) 秒 / 文件大小 \(fileSizeMegabytes(audioURL)) MB"
+    }
+
+    private static func timeoutSeconds(_ timeout: Duration) -> Int64 {
+        let components = timeout.components
+        if components.attoseconds > 0 {
+            return components.seconds + 1
+        }
+        return components.seconds
+    }
+
+    private static func fileSizeMegabytes(_ url: URL) -> String {
+        let size = (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? NSNumber)?
+            .doubleValue ?? 0
+        return String(format: "%.2f", size / 1_048_576)
     }
 
     private static func isQuotaLimited(_ error: Error) -> Bool {

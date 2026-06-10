@@ -136,7 +136,7 @@ struct FloatingPreviewView: View {
         case .completed:
             "已完成"
         case .idle:
-            "lesstype"
+            "typeart"
         case .error:
             "需要处理"
         }

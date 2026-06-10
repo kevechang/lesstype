@@ -144,7 +144,7 @@ public final class PreferencesStore {
 }
 
 public struct KeychainAPIKeyStore: APIKeyStoring {
-    private let service = "app.lesstype.voiceinput"
+    private let service = "app.typeart.voiceinput"
     private let account = "cloud-model-api-key"
 
     public init() {}

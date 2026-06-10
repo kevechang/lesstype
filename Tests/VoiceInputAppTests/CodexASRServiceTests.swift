@@ -56,6 +56,7 @@ final class CodexASRServiceTests: XCTestCase {
             session: Self.mockedSession { request in
                 XCTAssertEqual(request.url?.absoluteString, "https://chatgpt.com/backend-api/transcribe")
                 XCTAssertEqual(request.httpMethod, "POST")
+                XCTAssertEqual(request.timeoutInterval, 60)
                 XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer dummy-access-token")
                 XCTAssertEqual(request.value(forHTTPHeaderField: "Chatgpt-Account-Id"), "dummy-account-id")
                 XCTAssertEqual(request.value(forHTTPHeaderField: "originator"), "Codex Desktop")
@@ -152,8 +153,32 @@ final class CodexASRServiceTests: XCTestCase {
             preferences: preferences
         )
 
-        XCTAssertTrue(statuses.contains("Codex ASR 转写中..."))
+        XCTAssertTrue(statuses.contains { $0.hasPrefix("Codex ASR 转写中...") })
         XCTAssertTrue(statuses.contains { $0.hasPrefix("Codex ASR 已使用") })
+    }
+
+    @MainActor
+    func testFinalTranscriptionReportsDefaultWaitAndAudioFileSize() async throws {
+        var preferences = Preferences.defaults
+        preferences.cloudTranscriptionEnabled = true
+        let audioURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CodexASRServiceTests-\(UUID().uuidString).wav")
+        try Data(repeating: 0, count: 1_048_576).write(to: audioURL)
+        defer { try? FileManager.default.removeItem(at: audioURL) }
+        var statuses: [String] = []
+        let service = CodexASRFinalTranscriptionService(
+            transcription: StaticAudioTranscriptionService(text: "Codex ASR 结果"),
+            reportStatus: { status in
+                statuses.append(status)
+            }
+        )
+
+        _ = await service.resolvedText(
+            from: RecognitionResult(finalText: "Apple 结果", previews: [], audioURL: audioURL),
+            preferences: preferences
+        )
+
+        XCTAssertTrue(statuses.contains("Codex ASR 转写中... 最长等待 60 秒 / 文件大小 1.00 MB"))
     }
 
     @MainActor

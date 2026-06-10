@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="lesstype"
+APP_NAME="typeart"
 EXECUTABLE_NAME="VoiceInputApp"
 BUNDLE_DIR="dist/${APP_NAME}.app"
 EXECUTABLE=".build/debug/${EXECUTABLE_NAME}"
@@ -73,19 +73,19 @@ cat > "${BUNDLE_DIR}/Contents/Info.plist" <<'PLIST'
   <key>CFBundleExecutable</key>
   <string>VoiceInputApp</string>
   <key>CFBundleDisplayName</key>
-  <string>lesstype</string>
+  <string>typeart</string>
   <key>CFBundleIdentifier</key>
-  <string>app.lesstype.voiceinput</string>
+  <string>app.typeart.voiceinput</string>
   <key>CFBundleName</key>
-  <string>lesstype</string>
+  <string>typeart</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>LSMinimumSystemVersion</key>
   <string>14.0</string>
   <key>NSMicrophoneUsageDescription</key>
-  <string>lesstype needs microphone access to record dictation.</string>
+  <string>typeart needs microphone access to record dictation.</string>
   <key>NSSpeechRecognitionUsageDescription</key>
-  <string>lesstype needs speech recognition access to convert speech to text.</string>
+  <string>typeart needs speech recognition access to convert speech to text.</string>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
 </dict>

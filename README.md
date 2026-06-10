@@ -1,4 +1,4 @@
-# lesstype
+# typeart
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 ![macOS](https://img.shields.io/badge/macOS-14%2B-black.svg)
@@ -7,13 +7,13 @@
 
 [中文 README](./README.zh-CN.md)
 
-> Talk instead of type. **lesstype** is a lightweight, native macOS voice input app: trigger dictation anywhere with a global hotkey, watch the recognition stream in a floating panel, and drop the final text straight into the app you're using.
+> Talk instead of type. **typeart** is a lightweight, native macOS voice input app: trigger dictation anywhere with a global hotkey, watch the recognition stream in a floating panel, and drop the final text straight into the app you're using.
 
 It's built entirely with Swift, SwiftUI, AppKit, AVFoundation, and Apple's Speech framework — no Electron, no background daemon. Optional LLM post-processing can clean up everyday dictation or turn spoken notes into tidy numbered lists.
 
 ## Table of Contents
 
-- [Why lesstype](#why-lesstype)
+- [Why typeart](#why-typeart)
 - [Screenshots](#screenshots)
 - [Features](#features)
 - [Requirements](#requirements)
@@ -29,7 +29,7 @@ It's built entirely with Swift, SwiftUI, AppKit, AVFoundation, and Apple's Speec
 - [Contributing](#contributing)
 - [License](#license)
 
-## Why lesstype
+## Why typeart
 
 - **Native and lightweight** — pure Swift/SwiftUI/AppKit, runs as a small menu bar app.
 - **Works everywhere** — global hotkeys insert text into the currently focused app, not just a single editor.
@@ -72,28 +72,28 @@ It's built entirely with Swift, SwiftUI, AppKit, AVFoundation, and Apple's Speec
 
 ### Download the app
 
-Download the latest `lesstype-v*-macos.dmg` from [GitHub Releases](https://github.com/kevechang/lesstype/releases/latest), open it, then drag `lesstype.app` to `Applications`. A `.zip` package is also attached as a fallback.
+Download the latest `typeart-v*-macos.dmg` from [GitHub Releases](https://github.com/kevechang/typeart/releases/latest), open it, then drag `typeart.app` to `Applications`. A `.zip` package is also attached as a fallback.
 
 The app is currently ad-hoc signed but not notarized. On first launch, macOS may ask you to confirm opening it from **System Settings → Privacy & Security**.
 
 ### Build from source
 
 ```bash
-git clone https://github.com/kevechang/lesstype.git
-cd lesstype
+git clone https://github.com/kevechang/typeart.git
+cd typeart
 
 # build and test
 swift build
 swift test
 
-# build and launch the .app bundle (output: dist/lesstype.app)
+# build and launch the .app bundle (output: dist/typeart.app)
 ./script/build_and_run.sh
 
-# package a release zip (output: dist/lesstype-v0.1.1-macos.zip)
-./script/package_release.sh 0.1.1
+# package a release zip (output: dist/typeart-v0.1.2-macos.zip)
+./script/package_release.sh 0.1.2
 
-# package a DMG installer (output: dist/lesstype-v0.1.1-macos.dmg)
-./script/package_dmg.sh 0.1.1
+# package a DMG installer (output: dist/typeart-v0.1.2-macos.dmg)
+./script/package_dmg.sh 0.1.2
 ```
 
 On first launch, macOS may ask for Microphone, Speech Recognition, and Accessibility permissions. If hotkeys or text insertion don't work, grant access under:
@@ -131,7 +131,7 @@ Resources/                  App icon and bundled assets
 docs/                       Screenshots and public documentation
 ```
 
-> Note: the Swift package and executable target are named `VoiceInputApp` for historical reasons; the shipped product is **lesstype**.
+> Note: the Swift package and executable target are named `VoiceInputApp` for historical reasons; the shipped product is **typeart**.
 
 ## Architecture
 

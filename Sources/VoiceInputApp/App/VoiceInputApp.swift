@@ -6,7 +6,7 @@ struct VoiceInputApp: App {
     @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
-        WindowGroup("lesstype", id: "main") {
+        WindowGroup("typeart", id: "main") {
             MainWindowView(
                 store: appDelegate.preferencesStore,
                 runtimeStatus: appDelegate.runtimeStatus,
@@ -18,7 +18,7 @@ struct VoiceInputApp: App {
         }
         .defaultSize(width: 920, height: 680)
 
-        MenuBarExtra("lesstype", systemImage: "waveform") {
+        MenuBarExtra("typeart", systemImage: "waveform") {
             Button("打开主界面") {
                 openWindow(id: "main")
                 NSApp.activate(ignoringOtherApps: true)

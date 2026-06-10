@@ -242,7 +242,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func renderHotkeyStartFailure() {
         floatingPanel.show(
-            state: .error(message: "全局快捷键启动失败。请在系统设置里允许 lesstype 使用“辅助功能”，然后回到主界面点击“重新启用快捷键”。"),
+            state: .error(message: "全局快捷键启动失败。请在系统设置里允许 typeart 使用“辅助功能”，然后回到主界面点击“重新启用快捷键”。"),
             stop: nil,
             cancel: { [weak self] in self?.floatingPanel.hide() }
         )

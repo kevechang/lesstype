@@ -1,4 +1,4 @@
-# lesstype
+# typeart
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 ![macOS](https://img.shields.io/badge/macOS-14%2B-black.svg)
@@ -7,13 +7,13 @@
 
 [English README](./README.md)
 
-> 用说的，少打字。**lesstype** 是一个轻量级原生 macOS 语音输入 App：在任意场景用全局快捷键开始语音输入，在浮窗里看实时识别结果，然后把最终文本直接插入到你正在用的 App 里。
+> 用说的，少打字。**typeart** 是一个轻量级原生 macOS 语音输入 App：在任意场景用全局快捷键开始语音输入，在浮窗里看实时识别结果，然后把最终文本直接插入到你正在用的 App 里。
 
 项目完全使用 Swift、SwiftUI、AppKit、AVFoundation 和 Apple Speech framework 构建——没有 Electron，也没有后台守护进程。可选的大模型后处理能把普通口语整理成规整文本，或把分点笔记整理成编号列表。
 
 ## 目录
 
-- [为什么选 lesstype](#为什么选-lesstype)
+- [为什么选 typeart](#为什么选-typeart)
 - [截图](#截图)
 - [功能特性](#功能特性)
 - [环境要求](#环境要求)
@@ -29,7 +29,7 @@
 - [贡献](#贡献)
 - [许可证](#许可证)
 
-## 为什么选 lesstype
+## 为什么选 typeart
 
 - **原生且轻量**——纯 Swift/SwiftUI/AppKit，以小巧的菜单栏 App 形式运行。
 - **随处可用**——全局快捷键把文本插入到当前聚焦的 App，而不只是某一个编辑器。
@@ -72,28 +72,28 @@
 
 ### 下载 App
 
-从 [GitHub Releases](https://github.com/kevechang/lesstype/releases/latest) 下载最新的 `lesstype-v*-macos.dmg`，打开后把 `lesstype.app` 拖到 `Applications`。同时也会提供 `.zip` 作为备用下载。
+从 [GitHub Releases](https://github.com/kevechang/typeart/releases/latest) 下载最新的 `typeart-v*-macos.dmg`，打开后把 `typeart.app` 拖到 `Applications`。同时也会提供 `.zip` 作为备用下载。
 
 当前 App 使用 ad-hoc 签名，但还没有 notarize。首次启动时，macOS 可能需要你在 **系统设置 → 隐私与安全性** 中确认打开。
 
 ### 从源码构建
 
 ```bash
-git clone https://github.com/kevechang/lesstype.git
-cd lesstype
+git clone https://github.com/kevechang/typeart.git
+cd typeart
 
 # 构建并运行测试
 swift build
 swift test
 
-# 构建并启动 .app（产物：dist/lesstype.app）
+# 构建并启动 .app（产物：dist/typeart.app）
 ./script/build_and_run.sh
 
-# 打包 release zip（产物：dist/lesstype-v0.1.1-macos.zip）
-./script/package_release.sh 0.1.1
+# 打包 release zip（产物：dist/typeart-v0.1.2-macos.zip）
+./script/package_release.sh 0.1.2
 
-# 打包 DMG 安装包（产物：dist/lesstype-v0.1.1-macos.dmg）
-./script/package_dmg.sh 0.1.1
+# 打包 DMG 安装包（产物：dist/typeart-v0.1.2-macos.dmg）
+./script/package_dmg.sh 0.1.2
 ```
 
 首次启动时，macOS 可能会请求麦克风、语音识别和辅助功能权限。如果快捷键或文本插入不可用，请在以下位置授权：
@@ -131,7 +131,7 @@ Resources/                  App 图标和资源文件
 docs/                       截图和公开文档
 ```
 
-> 说明：由于历史原因，Swift package 和可执行 target 名为 `VoiceInputApp`；实际发布的产品名是 **lesstype**。
+> 说明：由于历史原因，Swift package 和可执行 target 名为 `VoiceInputApp`；实际发布的产品名是 **typeart**。
 
 ## 架构说明
 
