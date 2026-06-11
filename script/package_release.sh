@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP_NAME="typeart"
 EXECUTABLE_NAME="VoiceInputApp"
-VERSION="${1:-0.1.3}"
+VERSION="${1:-0.1.4}"
 BUILD_NUMBER="${BUILD_NUMBER:-1}"
 BUNDLE_DIR="dist/${APP_NAME}.app"
 EXECUTABLE=".build/release/${EXECUTABLE_NAME}"

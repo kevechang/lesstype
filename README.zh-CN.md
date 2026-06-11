@@ -89,11 +89,11 @@ swift test
 # 构建并启动 .app（产物：dist/typeart.app）
 ./script/build_and_run.sh
 
-# 打包 release zip（产物：dist/typeart-v0.1.3-macos.zip）
-./script/package_release.sh 0.1.3
+# 打包 release zip（产物：dist/typeart-v0.1.4-macos.zip）
+./script/package_release.sh 0.1.4
 
-# 打包 DMG 安装包（产物：dist/typeart-v0.1.3-macos.dmg）
-./script/package_dmg.sh 0.1.3
+# 打包 DMG 安装包（产物：dist/typeart-v0.1.4-macos.dmg）
+./script/package_dmg.sh 0.1.4
 ```
 
 首次启动时，macOS 可能会请求麦克风、语音识别和辅助功能权限。如果快捷键或文本插入不可用，请在以下位置授权：

@@ -1,6 +1,6 @@
 import Foundation
 import Security
-import AVFoundation
+@preconcurrency import AVFoundation
 
 public struct CodexASRCredentials: Codable, Equatable, Sendable {
     public let idToken: String
@@ -160,7 +160,33 @@ public struct M4ACodexASRAudioPreparer: CodexASRAudioPreparing {
         ) else {
             throw CodexASRError.requestFailed
         }
-        try await exportSession.export(to: outputURL, as: .m4a)
+        exportSession.outputURL = outputURL
+        exportSession.outputFileType = .m4a
+        exportSession.shouldOptimizeForNetworkUse = true
+
+        let exportSessionBox = AVAssetExportSessionBox(exportSession)
+        try await withCheckedThrowingContinuation { continuation in
+            exportSessionBox.session.exportAsynchronously {
+                switch exportSessionBox.session.status {
+                case .completed:
+                    continuation.resume()
+                case .cancelled:
+                    continuation.resume(throwing: CancellationError())
+                case .failed:
+                    continuation.resume(throwing: exportSessionBox.session.error ?? CodexASRError.requestFailed)
+                default:
+                    continuation.resume(throwing: exportSessionBox.session.error ?? CodexASRError.requestFailed)
+                }
+            }
+        }
+    }
+}
+
+private final class AVAssetExportSessionBox: @unchecked Sendable {
+    let session: AVAssetExportSession
+
+    init(_ session: AVAssetExportSession) {
+        self.session = session
     }
 }
 

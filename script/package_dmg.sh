@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_NAME="typeart"
-VERSION="${1:-0.1.3}"
+VERSION="${1:-0.1.4}"
 DMG_NAME="${APP_NAME}-v${VERSION}-macos.dmg"
 DMG_PATH="dist/${DMG_NAME}"
 CHECKSUM_PATH="${DMG_PATH}.sha256"

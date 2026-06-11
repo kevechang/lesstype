@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.4
+
+- Keep the Codex ASR m4a/AAC upload optimization while using a macOS 14-compatible AVFoundation export path.
+- Remove the Swift concurrency warning around AVAssetExportSession in the legacy export callback.
+
 ## v0.1.3
 
 - Convert Codex ASR uploads to temporary m4a/AAC before uploading when possible.
