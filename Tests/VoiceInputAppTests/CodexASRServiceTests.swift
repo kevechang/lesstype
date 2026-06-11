@@ -92,6 +92,37 @@ final class CodexASRServiceTests: XCTestCase {
         _ = try await service.transcribe(audioURL: audioURL, languageMode: .chineseFirst)
     }
 
+    func testTranscriptionUploadsPreparedM4AAudioWhenAvailable() async throws {
+        let audioURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CodexASRServiceTests-\(UUID().uuidString).wav")
+        try Data(repeating: 1, count: 4096).write(to: audioURL)
+        defer { try? FileManager.default.removeItem(at: audioURL) }
+        let preparedURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CodexASRServiceTests-\(UUID().uuidString).m4a")
+        try Data("m4a".utf8).write(to: preparedURL)
+        let credentialStore = InMemoryCodexASRCredentialStore()
+        credentialStore.credentials = Self.testCredentials
+        let service = CodexASRTranscriptionService(
+            credentialStore: credentialStore,
+            session: Self.mockedSession { request in
+                let body = try XCTUnwrap(Self.requestBodyData(from: request))
+                let bodyText = String(decoding: body, as: UTF8.self)
+                XCTAssertTrue(bodyText.contains(#"filename="\#(preparedURL.lastPathComponent)""#))
+                XCTAssertTrue(bodyText.contains("Content-Type: audio/mp4"))
+                XCTAssertTrue(bodyText.contains("m4a"))
+                XCTAssertFalse(bodyText.contains(String(repeating: "\u{1}", count: 16)))
+                return Self.response(body: #"{"text":"Codex 转写结果"}"#, url: request.url)
+            },
+            audioPreparer: StaticCodexASRAudioPreparer(
+                uploadAudio: CodexASRUploadAudio(url: preparedURL, removeAfterUpload: true)
+            )
+        )
+
+        _ = try await service.transcribe(audioURL: audioURL, languageMode: .chineseFirst)
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: preparedURL.path))
+    }
+
     func testFinalTranscriptionReplacesASRPunctuationWithSpacesWhenPunctuationDisabled() async throws {
         var preferences = Preferences.defaults
         preferences.cloudTranscriptionEnabled = true
@@ -205,6 +236,29 @@ final class CodexASRServiceTests: XCTestCase {
 
         XCTAssertEqual(result, "Apple 结果")
         XCTAssertTrue(statuses.contains { $0.contains("超时") && $0.contains("Apple") })
+    }
+
+    @MainActor
+    func testFinalTranscriptionTimeoutDoesNotWaitForSlowCancellationCleanup() async throws {
+        var preferences = Preferences.defaults
+        preferences.cloudTranscriptionEnabled = true
+        let audioURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CodexASRServiceTests-\(UUID().uuidString).wav")
+        try Data("audio".utf8).write(to: audioURL)
+        defer { try? FileManager.default.removeItem(at: audioURL) }
+        let service = CodexASRFinalTranscriptionService(
+            transcription: SlowCancellationCleanupAudioTranscriptionService(),
+            timeout: .milliseconds(10)
+        )
+        let startedAt = Date()
+
+        let result = await service.resolvedText(
+            from: RecognitionResult(finalText: "Apple 结果", previews: [], audioURL: audioURL),
+            preferences: preferences
+        )
+
+        XCTAssertEqual(result, "Apple 结果")
+        XCTAssertLessThan(Date().timeIntervalSince(startedAt), 0.12)
     }
 
     @MainActor
@@ -365,10 +419,34 @@ private struct SlowAudioTranscriptionService: AudioTranscriptionServing {
     }
 }
 
+private struct SlowCancellationCleanupAudioTranscriptionService: AudioTranscriptionServing {
+    func transcribe(audioURL: URL, languageMode: LanguageMode) async throws -> String {
+        do {
+            try await Task.sleep(for: .seconds(60))
+        } catch {
+            await withCheckedContinuation { continuation in
+                DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) {
+                    continuation.resume()
+                }
+            }
+            throw error
+        }
+        return "太晚了"
+    }
+}
+
 private struct FailingAudioTranscriptionService: AudioTranscriptionServing {
     let error: Error
 
     func transcribe(audioURL: URL, languageMode: LanguageMode) async throws -> String {
         throw error
+    }
+}
+
+private struct StaticCodexASRAudioPreparer: CodexASRAudioPreparing {
+    let uploadAudio: CodexASRUploadAudio
+
+    func preparedAudio(for audioURL: URL) async -> CodexASRUploadAudio {
+        uploadAudio
     }
 }

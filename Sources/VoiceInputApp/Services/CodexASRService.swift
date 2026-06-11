@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import AVFoundation
 
 public struct CodexASRCredentials: Codable, Equatable, Sendable {
     public let idToken: String
@@ -112,19 +113,73 @@ public protocol AudioTranscriptionServing: Sendable {
     func transcribe(audioURL: URL, languageMode: LanguageMode) async throws -> String
 }
 
+public struct CodexASRUploadAudio: Sendable {
+    public let url: URL
+    public let removeAfterUpload: Bool
+
+    public init(url: URL, removeAfterUpload: Bool = false) {
+        self.url = url
+        self.removeAfterUpload = removeAfterUpload
+    }
+}
+
+public protocol CodexASRAudioPreparing: Sendable {
+    func preparedAudio(for audioURL: URL) async -> CodexASRUploadAudio
+}
+
+public struct M4ACodexASRAudioPreparer: CodexASRAudioPreparing {
+    public init() {}
+
+    public func preparedAudio(for audioURL: URL) async -> CodexASRUploadAudio {
+        guard audioURL.pathExtension.lowercased() != "m4a" else {
+            return CodexASRUploadAudio(url: audioURL)
+        }
+
+        let outputURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("VoiceInput-upload-\(UUID().uuidString).m4a")
+        do {
+            try await Self.exportM4A(from: audioURL, to: outputURL)
+            let size = (try? FileManager.default.attributesOfItem(atPath: outputURL.path)[.size] as? NSNumber)?
+                .intValue ?? 0
+            guard size > 0 else {
+                try? FileManager.default.removeItem(at: outputURL)
+                return CodexASRUploadAudio(url: audioURL)
+            }
+            return CodexASRUploadAudio(url: outputURL, removeAfterUpload: true)
+        } catch {
+            try? FileManager.default.removeItem(at: outputURL)
+            return CodexASRUploadAudio(url: audioURL)
+        }
+    }
+
+    private static func exportM4A(from inputURL: URL, to outputURL: URL) async throws {
+        let asset = AVURLAsset(url: inputURL)
+        guard let exportSession = AVAssetExportSession(
+            asset: asset,
+            presetName: AVAssetExportPresetAppleM4A
+        ) else {
+            throw CodexASRError.requestFailed
+        }
+        try await exportSession.export(to: outputURL, as: .m4a)
+    }
+}
+
 public struct CodexASRTranscriptionService: AudioTranscriptionServing {
     private let credentialStore: CodexASRCredentialStoring
     private let session: URLSession
     private let endpoint: URL
+    private let audioPreparer: any CodexASRAudioPreparing
 
     public init(
         credentialStore: CodexASRCredentialStoring = KeychainCodexASRCredentialStore(),
         session: URLSession = .shared,
-        endpoint: URL = URL(string: "https://chatgpt.com/backend-api/transcribe")!
+        endpoint: URL = URL(string: "https://chatgpt.com/backend-api/transcribe")!,
+        audioPreparer: any CodexASRAudioPreparing = M4ACodexASRAudioPreparer()
     ) {
         self.credentialStore = credentialStore
         self.session = session
         self.endpoint = endpoint
+        self.audioPreparer = audioPreparer
     }
 
     public func transcribe(audioURL: URL, languageMode: LanguageMode) async throws -> String {
@@ -140,7 +195,13 @@ public struct CodexASRTranscriptionService: AudioTranscriptionServing {
         request.setValue("Codex Desktop", forHTTPHeaderField: "originator")
         request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
 
-        let body = try multipartBody(audioURL: audioURL, languageMode: languageMode, request: &request)
+        let uploadAudio = await audioPreparer.preparedAudio(for: audioURL)
+        defer {
+            if uploadAudio.removeAfterUpload {
+                try? FileManager.default.removeItem(at: uploadAudio.url)
+            }
+        }
+        let body = try multipartBody(audioURL: uploadAudio.url, languageMode: languageMode, request: &request)
         request.httpBody = body
 
         let (data, response) = try await session.data(for: request)
@@ -284,20 +345,66 @@ public struct CodexASRFinalTranscriptionService: Sendable {
     }
 
     private func transcribeWithTimeout(audioURL: URL, languageMode: LanguageMode) async throws -> String {
-        try await withThrowingTaskGroup(of: String.self) { group in
-            group.addTask {
-                try await transcription.transcribe(audioURL: audioURL, languageMode: languageMode)
-            }
-            group.addTask {
-                try await Task.sleep(for: timeout)
-                throw CodexASRError.timeout
-            }
+        let transcriptionTask = Task {
+            try await transcription.transcribe(audioURL: audioURL, languageMode: languageMode)
+        }
+        let timeoutTask = Task<String, Error> {
+            try await Task.sleep(for: timeout)
+            throw CodexASRError.timeout
+        }
 
-            guard let result = try await group.next() else {
-                throw CodexASRError.emptyResponse
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                let state = OneShotFlag()
+
+                Task {
+                    do {
+                        let value = try await transcriptionTask.value
+                        if state.claim() {
+                            timeoutTask.cancel()
+                            continuation.resume(returning: value)
+                        }
+                    } catch {
+                        if state.claim() {
+                            timeoutTask.cancel()
+                            continuation.resume(throwing: error)
+                        }
+                    }
+                }
+
+                Task {
+                    do {
+                        let value = try await timeoutTask.value
+                        if state.claim() {
+                            transcriptionTask.cancel()
+                            continuation.resume(returning: value)
+                        }
+                    } catch {
+                        if state.claim() {
+                            transcriptionTask.cancel()
+                            continuation.resume(throwing: error)
+                        }
+                    }
+                }
             }
-            group.cancelAll()
-            return result
+        } onCancel: {
+            transcriptionTask.cancel()
+            timeoutTask.cancel()
+        }
+    }
+
+    private final class OneShotFlag: @unchecked Sendable {
+        private let lock = NSLock()
+        private var claimed = false
+
+        func claim() -> Bool {
+            lock.withLock {
+                guard !claimed else {
+                    return false
+                }
+                claimed = true
+                return true
+            }
         }
     }
 

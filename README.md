@@ -89,11 +89,11 @@ swift test
 # build and launch the .app bundle (output: dist/typeart.app)
 ./script/build_and_run.sh
 
-# package a release zip (output: dist/typeart-v0.1.2-macos.zip)
-./script/package_release.sh 0.1.2
+# package a release zip (output: dist/typeart-v0.1.3-macos.zip)
+./script/package_release.sh 0.1.3
 
-# package a DMG installer (output: dist/typeart-v0.1.2-macos.dmg)
-./script/package_dmg.sh 0.1.2
+# package a DMG installer (output: dist/typeart-v0.1.3-macos.dmg)
+./script/package_dmg.sh 0.1.3
 ```
 
 On first launch, macOS may ask for Microphone, Speech Recognition, and Accessibility permissions. If hotkeys or text insertion don't work, grant access under:
